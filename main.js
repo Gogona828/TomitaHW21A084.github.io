@@ -1,36 +1,58 @@
-const taskValue = document.getElementsByClassName('task_value')[0];
-const taskSubmit = document.getElementsByClassName('task_submit')[0];
-const taskList = document.getElementsByClassName('task_list')[0];
 
-// 追加ボタンを作成
-const addTasks = (task) => {
-  // 入力したタスクを追加・表示
-  const listItem = document.createElement('li');
-  const showItem = taskList.appendChild(listItem);
-  showItem.innerHTML = task;
+// drag 設定
+document.querySelector(".box.drag").draggable = true;
+document.querySelector(".box.drag").addEventListener("dragstart", onDragStart);
 
-  // タスクに削除ボタンを付与
-  const deleteButton = document.createElement('button');
-  deleteButton.innerHTML = 'Delete';
-  listItem.appendChild(deleteButton);
-
-  // 削除ボタンをクリックし、イベントを発動（タスクが削除）
-  deleteButton.addEventListener('click', evt => {
-    evt.preventDefault();
-    deleteTasks(deleteButton);
-  });
-};
-
-// 削除ボタンにタスクを消す機能を付与
-const deleteTasks = (deleteButton) => {
-  const chosenTask = deleteButton.closest('li');
-  taskList.removeChild(chosenTask);
-};
-
-// 追加ボタンをクリックし、イベントを発動（タスクが追加）
-taskSubmit.addEventListener('click', evt => {
-  evt.preventDefault();
-  const task = taskValue.value;
-  addTasks(task);
-  taskValue.value = '';
+// drop 設定
+document.querySelectorAll(".box.drop").forEach((element) => {
+    element.addEventListener("drop", onDrop);
+    element.addEventListener("dragover", onDragover);
+    element.addEventListener("dragenter", onDragenter);
+    element.addEventListener("dragleave", onDragleave);
 });
+
+/**
+ * ドラッグ処理
+ * @param {Event} event 
+ */
+function onDragStart(event) {
+    event.dataTransfer.setData("text", event.currentTarget.id);
+}
+
+/**
+ * ドロップ処理
+ * @param {Event} event 
+ */
+function onDrop(event) {
+    event.currentTarget.classList.remove("dragging");
+    const boxs = [...document.querySelectorAll(".box")];
+    if (boxs.indexOf(event.currentTarget) === 0) {
+        event.currentTarget.before(document.getElementById(event.dataTransfer.getData("text")));
+    } else {
+        event.currentTarget.after(document.getElementById(event.dataTransfer.getData("text")));
+    }
+}
+
+/**
+ * 操作が要素上に入ってきたとき
+ * @param {Event} event 
+ */
+function onDragenter(event) {
+    event.currentTarget.classList.toggle("dragging");
+}
+
+/**
+ * 操作が要素上から出たとき
+ * @param {Event} event 
+ */
+function onDragleave(event) {
+    event.currentTarget.classList.toggle("dragging");
+}
+
+/**
+ * 操作が要素上を通過してるとき
+ * @param {Event} event 
+ */
+function onDragover(event) {
+    event.preventDefault();
+}
